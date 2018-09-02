@@ -56,13 +56,13 @@ global_step = tf.Variable(0,trainable=False)
 
 # print(net,y)
 
-softmax = tf.nn.softmax(net)
+# softmax = tf.nn.softmax(net)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=net, labels=y))
 #cost = tf.reduce_mean(tf.square(net-y))
 #train = tf.train.GradientDescentOptimizer(1e-3).minimize(cost,global_step=global_step)
 #train = tf.train.AdamOptimizer(1e-3).minimize(cost, global_step=global_step)
-train = tf.train.MomentumOptimizer(learning_rate=1e-3,momentum=0.3).minimize(cost, global_step=global_step)
+train = tf.train.MomentumOptimizer(learning_rate=1e-3,momentum=0.5).minimize(cost, global_step=global_step)
 
 correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
@@ -83,11 +83,15 @@ with tf.Session() as sess:
         for batch in range(125):
             # print("start batch",epoch,batch)
             # print(labels,images)
-            #sess.run(train)
+            # sess.run(train)
             # print('trainning')
 
-            image, name, label, _, step, cos, acc= sess.run([x, y, softmax, train, global_step, cost, accuracy])
-            print("epoch", epoch, "Step", step, "image", image, "in", name, "out", label, "Cost:", cos, "Accuracy", acc)
+            # image, name, label, _, step, cos, acc= sess.run([x, y, softmax, train, global_step, cost, accuracy])
+            # print("epoch", epoch, "Step", step, "image", image, "in", name, "out", label, "Cost:", cos, "Accuracy", acc)
+            # saver.save(sess, chack_point_path)
+
+            _, step, cos, acc= sess.run([train, global_step, cost, accuracy])
+            print("epoch", epoch, "Step", step, "Cost:", cos, "Accuracy", acc)
             saver.save(sess, chack_point_path)
 
             # plt.figure

@@ -19,7 +19,7 @@ class netInit(object):
     
 net = squeezenet.Squeezenet(netInit)
 print('new net',net)
-net = net.build(image, is_training=True)
+net = net.build(image, is_training=False)
 print("build net",net)
 
 face_cascade = cv2.CascadeClassifier('./haarcascade_frontalface_default.xml')
