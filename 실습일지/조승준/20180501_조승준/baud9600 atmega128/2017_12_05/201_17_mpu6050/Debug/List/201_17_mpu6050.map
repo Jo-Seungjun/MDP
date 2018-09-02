@@ -1,0 +1,35 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+dtemp                                                                             0x0500       2
+sbuf                                                                              0x0502      16
+mpu_addr                                                                          0x0512      14
+mpu6050_buf                                                                       0x0520      14
+mpu6050                                                                           0x052E      14
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+i                                                                                 R5           1
+j                                                                                 R4           1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+mpu6050_read                                                                      0x000A7     81
+mpu6050_write                                                                     0x000F8     48
+tx_trans                                                                          0x00128     22
+tx_str_trans                                                                      0x0013E     18
+usart0_rx_isr                                                                     0x00150      3
+usart1_rx_isr                                                                     0x00153      5
+getraw_mpu6050                                                                    0x00158    131
+main                                                                              0x001DB    147
+put_buff_G100                                                                     0x0026E     43
+_print_G100                                                                       0x00299    294
+sprintf                                                                           0x003BF     49
+strlen                                                                            0x003F0     12
+strlenf                                                                           0x003FC     13

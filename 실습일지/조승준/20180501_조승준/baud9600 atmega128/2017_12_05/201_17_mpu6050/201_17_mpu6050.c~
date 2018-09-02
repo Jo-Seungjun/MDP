@@ -1,0 +1,155 @@
+#include <io.h>
+#include <stdio.h>
+#include <delay.h>
+#include "intech_twi.h"
+
+volatile int dtemp;
+
+unsigned char sbuf[16];
+unsigned char i,j;
+
+char mpu_addr[] = {0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48};
+
+volatile char mpu6050_buf[14] = {0,};
+
+struct m6050
+{
+    volatile int ax;
+    volatile int ay;
+    volatile int az;
+    
+    volatile int temp;
+    
+    volatile int gx;
+    volatile int gy;
+    volatile int gz;
+}mpu6050;
+
+void tx_trans(int tx_port, char data)
+{
+    switch(tx_port)
+    {
+        case 0:
+            while(!(UCSR0A & 0x20));
+            
+            UDR0 = data;
+            break; 
+        case 1:
+            while(!(UCSR1A & 0x20));
+            
+            UDR1 = data;
+            break; 
+        default:
+            break;   
+    }
+}
+
+void tx_str_trans(int tx_port, unsigned char *tx_str)
+{
+    while(*tx_str != '\0')
+    {
+        tx_trans(tx_port, *tx_str);
+        tx_str++;
+    }
+}
+
+interrupt [USART0_RXC] void usart0_rx_isr(void)
+{
+    char data;
+    data = UDR0;
+}
+
+interrupt [USART1_RXC] void usart1_rx_isr(void)
+{
+    char data;
+    data = UDR1;
+}
+
+void getraw_mpu6050(void)
+{
+    for(i=0;i<14;i++)
+    {
+        mpu6050_buf[i] = mpu6050_read(0x68, mpu_addr[i]);
+    }
+    
+    mpu6050.ax = (int)mpu6050_buf[0] << 8 | (int)mpu6050_buf[1];
+    mpu6050.ay = (int)mpu6050_buf[2] << 8 | (int)mpu6050_buf[3];
+    mpu6050.az = (int)mpu6050_buf[4] << 8 | (int)mpu6050_buf[5];
+    
+    dtemp = (int)mpu6050_buf[6] << 8 | (int)mpu6050_buf[7];
+    mpu6050.temp = ((float)dtemp + 12412.0) / 340.0;
+      
+    mpu6050.gx = (int)mpu6050_buf[8] << 8 | (int)mpu6050_buf[9];
+    mpu6050.gy = (int)mpu6050_buf[10] << 8 | (int)mpu6050_buf[11];
+    mpu6050.gz = (int)mpu6050_buf[12] << 8 | (int)mpu6050_buf[13];
+}
+
+void main()
+{
+    DDRB=(1<<DDB7) | (1<<DDB6) | (1<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
+    PORTB=(0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
+
+    DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
+    PORTD=(0<<PORTD7) | (0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (0<<PORTD1) | (0<<PORTD0);
+
+    DDRE=(0<<DDE7) | (0<<DDE6) | (1<<DDE5) | (1<<DDE4) | (1<<DDE3) | (0<<DDE2) | (0<<DDE1) | (0<<DDE0);
+    PORTE=(1<<PORTE7) | (1<<PORTE6) | (1<<PORTE5) | (1<<PORTE4) | (1<<PORTE3) | (0<<PORTE2) | (0<<PORTE1) | (0<<PORTE0);
+    
+    DDRG=(1<<DDG4) | (1<<DDG3) | (1<<DDG2) | (1<<DDG1) | (1<<DDG0);
+    PORTG=(0<<PORTG4) | (0<<PORTG3) | (0<<PORTG2) | (0<<PORTG1) | (0<<PORTG0);
+    
+    UCSR0A=(0<<RXC0) | (0<<TXC0) | (0<<UDRE0) | (0<<FE0) | (0<<DOR0) | (0<<UPE0) | (0<<U2X0) | (0<<MPCM0);
+    UCSR0B=(1<<RXCIE0) | (0<<TXCIE0) | (0<<UDRIE0) | (1<<RXEN0) | (1<<TXEN0) | (0<<UCSZ02) | (0<<RXB80) | (0<<TXB80);
+    UCSR0C=(0<<UMSEL0) | (0<<UPM01) | (0<<UPM00) | (0<<USBS0) | (1<<UCSZ01) | (1<<UCSZ00) | (0<<UCPOL0);
+    UBRR0H=0x00;
+    UBRR0L=0x67;
+    
+    UCSR1B=(0<<RXCIE1) | (0<<TXCIE1) | (0<<UDRIE1) | (0<<RXEN1) | (0<<TXEN1) | (0<<UCSZ12) | (0<<RXB81) | (0<<TXB81);
+
+    #asm("sei")
+    
+    TWSR = 0x00;
+    TWBR = 0x12;
+    
+    mpu6050_write(0x68, 0x6B, 0x00);
+    mpu6050_write(0x68, 0x6C, 0x00); 
+    
+    mpu6050_write(0x68, 0x1B, 0x10);
+    mpu6050_write(0x68, 0x1C, 0x10);   
+    
+    getraw_mpu6050();
+    
+    while(1)
+    {
+        getraw_mpu6050();
+        
+        sprintf(sbuf,"\r\nmpu6050 temp=%dc,ax=%d,ay=%d,az=%d,gx=%d,gy=%d,gz=%d\r\n"
+                , mpu6050.temp, mpu6050.ax, mpu6050.ay, mpu6050.az, mpu6050.gx, mpu6050.gy, mpu6050.gz);
+        tx_str_trans(0,sbuf);    
+        
+        
+        if(mpu6050.gx > 0){
+            PORTA.0 = 0;   
+            PORTG.0 = 1;
+            PORTG.1 = 0;
+        }else if(mpu6050.gx < 0){
+            PORTG.0 = 0;
+            PORTG.1 = 1;
+        }else{
+            PORTG.0 = 0;
+            PORTG.1 = 0;
+        }
+        
+        if(mpu6050.gy > 0){   
+            PORTG.2 = 1;
+            PORTG.3 = 0;
+        }else if(mpu6050.gy < 0){
+            PORTG.2 = 0;
+            PORTG.3 = 1;
+        }else{
+            PORTG.2 = 0;
+            PORTG.3 = 0;
+        }
+    }
+    delay_ms(500);
+}

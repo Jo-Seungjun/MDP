@@ -1,0 +1,46 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion '27.0.3'
+    defaultConfig {
+        applicationId 'com.playrtc.simplechat'
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode 20
+        versionName "2.3.0"
+        multiDexEnabled true
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+        preDexLibraries = false
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    productFlavors {
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    //    compile files('libs/libjingle_peerconnection.jar')
+    //    compile files('libs/sktplayrtc-client.2.0.0.jar')
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:support-v13:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:multidex:1.0.1'
+    compile files('libs/libjingle_peerconnection_heads59r6.jar')
+    compile files('libs/sktplayrtc-client.2.2.12.jar')
+//    compile files('libs/libjingle_peerconnection_r16409.jar')
+//    compile files('libs/sktplayrtc-client.2.2.11.jar')
+}

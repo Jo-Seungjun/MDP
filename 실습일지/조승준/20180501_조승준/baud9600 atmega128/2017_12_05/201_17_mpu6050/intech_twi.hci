@@ -1,0 +1,5 @@
+VERSION:3 SOURCE_TIMESTAMP:4B8576D9
+NODE:M LEVEL:0 LINE:5 "_Intech_twi_INCLUDED_"
+NODE:I LEVEL:0 LINE:7 "C:\cvavreval\inc\io.h"
+NODE:F LEVEL:0 LINE:46 "mpu6050_read(unsigned char twi,unsigned char addr)"
+NODE:F LEVEL:0 LINE:85 "mpu6050_write(unsigned char twi,unsigned char addr,unsigned char data)"

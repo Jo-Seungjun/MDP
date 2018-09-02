@@ -1,0 +1,5 @@
+TX0->TX1
+RX0->RX1
+
+TX1->TX0
+RX1->RX0

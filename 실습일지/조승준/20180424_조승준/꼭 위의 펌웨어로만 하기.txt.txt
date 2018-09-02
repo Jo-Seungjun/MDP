@@ -1,0 +1,1 @@
+esptool.py --port COM3 --baud 115200 write_flash -fm dio -fs 32m 0x00000 v0.9.2.2-AT-Firmware.bin
